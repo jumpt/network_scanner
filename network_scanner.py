@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 
 import scapy.all as scapy
+import argparse
+
+def get_arguments():
+    # This code chunk comes from the MAC change program so see the comments on that for more detail
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--target", dest="target", help="target IP or network")
+    args = parser.parse_args()
+    if not args.target:
+        parser.error("[-] Please enter a target")
+    return args
 
 
 def scan(ip):
@@ -38,8 +48,10 @@ def scan(ip):
     # implemented by scapy. This line gets commented out because we want to parse the list and extract the useful
     # information not just use the built in method summary.
 
-    print("IP\t\t\tMac Address\n-----------------------------------------")
-    # the \t means insert a tab, \n means new line
+
+
+    clients_list = []
+    # this creates an empty list
 
     for element in answered_list:
         # print(element[1].psrc)
@@ -51,15 +63,33 @@ def scan(ip):
         # interested in the packet received so we want sub element 1. The show command will show the fields available
         # in the packet.
 
-        print(element[1].psrc + "\t\t" + element[1].hwsrc)
-        # this combines the above print statements
+        client_dict = {"ip": element[1].psrc, "mac": element[1].hwsrc}
+        # this will create a dictionary for each element in the list
+        clients_list.append(client_dict)
+        # this will add the dictionary to an element in the list
+
+        # print(element[1].psrc + "\t\t" + element[1].hwsrc)
+        # this combines the above print statements, for the final program we want to separate out the printing function
+    return clients_list
+    # this returns a list of dictionaries to the main program
 
     # print(arp_request_broadcast.summary())
     # the class has a summary method which displays a summary
     # arp_request_broadcast.show()
     # this shows more details about the packet
 
-scan("10.0.3.0/24")
+def print_results(results_list):
+    # this function iterates through the dictionaries and prints the result.
+    print("IP\t\t\tMac Address\n-----------------------------------------")
+    # the \t means insert a tab, \n means new line
+    for client in results_list:
+        # print(client)
+        # this will print the complete dictionary for each element.
+        print(client["ip"] + "\t\t" + client["mac"])
 
-# test1
+
+args = get_arguments()
+scan_result = scan(args.target)
+print_results(scan_result)
+
 
